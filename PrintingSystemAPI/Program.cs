@@ -1,4 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+using PrintingSystem.Db;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<PrintingSystemContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
 
