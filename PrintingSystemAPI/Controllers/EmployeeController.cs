@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PrintingSystem.Db;
-using PrintingSystem.Db.Models;
+using PrintingSystem.Db.Interfaces;
+using PrintingSystemAPI.Models;
 
 namespace PrintingSystemAPI.Controllers
 {
@@ -9,17 +8,18 @@ namespace PrintingSystemAPI.Controllers
     [Route("[controller]")]
     public class EmployeeController : Controller
     {
-        private readonly PrintingSystemContext context;
+        private readonly IEmployeeRepository employeeRepository;
 
-        public EmployeeController(PrintingSystemContext context)
+        public EmployeeController(IEmployeeRepository employeeRepository)
         {
-            this.context = context;
+            this.employeeRepository = employeeRepository;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
+        public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetAllAsync()
         {
-            return await context.Employees.ToListAsync();
+            var employees = await employeeRepository.GetAllAsync();
+            return Ok(employees.Select(e => new EmployeeDTO() { Id = e.Id, Name = e.Name }));
         }
 
     }

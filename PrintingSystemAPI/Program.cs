@@ -1,12 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using PrintingSystem.Db;
+using PrintingSystem.Db.Implementations;
+using PrintingSystem.Db.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 builder.Services.AddDbContext<PrintingSystemContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Add services to the container.
+builder.Services.AddTransient<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddTransient<IOfficeRepository, OfficeRepository>();
+builder.Services.AddTransient<IPrintingDeviceRepository, PrintingDeviceRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
