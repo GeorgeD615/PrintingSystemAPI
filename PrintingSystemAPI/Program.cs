@@ -11,6 +11,7 @@ builder.Services.AddDbContext<PrintingSystemContext>(options =>
 builder.Services.AddTransient<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddTransient<IOfficeRepository, OfficeRepository>();
 builder.Services.AddTransient<IPrintingDeviceRepository, PrintingDeviceRepository>();
+builder.Services.AddTransient<IInstallationRepository, InstallationRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
