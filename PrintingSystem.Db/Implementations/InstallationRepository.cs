@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
+using Microsoft.Extensions.Caching.Memory;
 using PrintingSystem.Db.Interfaces;
 using PrintingSystem.Db.Models;
 
@@ -8,12 +8,16 @@ namespace PrintingSystem.Db.Implementations
     public class InstallationRepository : IInstallationRepository
     {
         private readonly PrintingSystemContext dbcontext;
+        private readonly IMemoryCache memoryCache;
+        private readonly TimeSpan cacheDuration = TimeSpan.FromMinutes(105); // 1 час 45 минут
+        private const string CacheKey = "installations_cache";
         private int MaxInstallationOrderNumber { get; } = 255;
         private int MinInstallationOrderNumber { get; } = 1;
 
-        public InstallationRepository(PrintingSystemContext dbcontext)
+        public InstallationRepository(PrintingSystemContext dbcontext, IMemoryCache memoryCache)
         {
             this.dbcontext = dbcontext;
+            this.memoryCache = memoryCache;
         }
 
         public async Task<Guid> CreateAsync(Installation installation)
@@ -69,22 +73,60 @@ namespace PrintingSystem.Db.Implementations
 
             await dbcontext.SaveChangesAsync();
 
+            await UpdateCache();
+
             return installation.Id;
         }
 
-        public async Task<Installation> GetById(Guid id)
+        public async Task<Installation?> GetById(Guid id)
         {
-            return await dbcontext.Installations.FindAsync(id);
+            if (!memoryCache.TryGetValue(CacheKey, out IEnumerable<Installation> installations))
+            {
+                installations = await dbcontext.Installations.ToListAsync();
+
+                var cacheOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = cacheDuration
+                };
+
+                memoryCache.Set(CacheKey, installations, cacheOptions);
+            }
+
+            return installations!.FirstOrDefault(inst => inst.Id == id);
         }
 
         public async Task<IEnumerable<Installation>> GetByOfficeId(Guid id)
         {
-            return await dbcontext.Installations.Where(inst => inst.OfficeId == id).ToListAsync();
+            if (!memoryCache.TryGetValue(CacheKey, out IEnumerable<Installation> installations))
+            {
+                installations = await dbcontext.Installations.ToListAsync();
+
+                var cacheOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = cacheDuration
+                };
+
+                memoryCache.Set(CacheKey, installations, cacheOptions);
+            }
+
+            return installations!.Where(inst => inst.OfficeId == id);
         }
 
         public async Task<IEnumerable<Installation>> GetAll()
         {
-            return await dbcontext.Installations.ToListAsync();
+            if (!memoryCache.TryGetValue(CacheKey, out IEnumerable<Installation> installations))
+            {
+                installations = await dbcontext.Installations.ToListAsync();
+
+                var cacheOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = cacheDuration
+                };
+
+                memoryCache.Set(CacheKey, installations, cacheOptions);
+            }
+
+            return installations;
         }
 
         public async Task Delete(Guid id)
@@ -99,6 +141,20 @@ namespace PrintingSystem.Db.Implementations
 
             dbcontext.Installations.Remove(installation);
             await dbcontext.SaveChangesAsync();
+
+            await UpdateCache();
+        }
+
+        public async Task UpdateCache()
+        {
+            var installations = await dbcontext.Installations.AsNoTracking().ToListAsync();
+
+            var cacheOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = cacheDuration
+            };
+
+            memoryCache.Set(CacheKey, installations, cacheOptions);
         }
     }
 }
