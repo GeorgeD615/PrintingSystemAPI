@@ -8,10 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<PrintingSystemContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddTransient<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddTransient<IOfficeRepository, OfficeRepository>();
 builder.Services.AddTransient<IPrintingDeviceRepository, PrintingDeviceRepository>();
 builder.Services.AddTransient<IInstallationRepository, InstallationRepository>();
+builder.Services.AddTransient<ISessionRepository, SessionRepository>();
 
 builder.Services.AddMemoryCache();
 

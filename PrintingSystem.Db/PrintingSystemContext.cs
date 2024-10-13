@@ -92,8 +92,7 @@ public partial class PrintingSystemContext : DbContext
             entity.Property(e => e.OfficeId).HasColumnName("office_id");
             entity.Property(e => e.PrintingDeviceId).HasColumnName("printing_device_id");
 
-            entity.HasOne(d => d.Office).WithOne(p => p.Installation)
-                .HasForeignKey<Installation>(d => d.OfficeId)
+            entity.HasOne(d => d.Office).WithMany(p => p.Installations)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Installat__offic__32E0915F");
 

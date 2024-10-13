@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace PrintingSystem.Db.Models;
+﻿namespace PrintingSystem.Db.Models;
 
 public partial class Office
 {
@@ -11,5 +8,5 @@ public partial class Office
 
     public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
 
-    public virtual Installation? Installation { get; set; }
+    public virtual ICollection<Installation> Installations { get; set; } = new List<Installation>();
 }

@@ -9,7 +9,7 @@ namespace PrintingSystem.Db.Implementations
     {
         private readonly PrintingSystemContext dbcontext;
         private readonly IMemoryCache memoryCache;
-        private readonly TimeSpan cacheDuration = TimeSpan.FromMinutes(105); // 1 час 45 минут
+        private readonly TimeSpan cacheDuration = TimeSpan.FromMinutes(105);
         private const string CacheKey = "installations_cache";
         private int MaxInstallationOrderNumber { get; } = 255;
         private int MinInstallationOrderNumber { get; } = 1;
