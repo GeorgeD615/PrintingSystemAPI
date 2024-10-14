@@ -60,29 +60,50 @@ namespace PrintingSystemAPI.Controllers
             var installation = await installationRepository.GetByIdAsync(id);
 
             if (installation == null)
-                return NotFound();
+                return NotFound(new { message = "Installation not found." });
 
-            return Ok(installation);
+            var installationDTO = new InstalationDTO()
+            {
+                Id = installation.Id,
+                Name = installation.Name,
+                OfficeId = installation.OfficeId,
+                PrintingDeviceId = installation.PrintingDeviceId,
+                InstallationOrderNumber = installation.InstallationOrderNumber,
+                IsDefault = installation.IsDefault
+            };
+
+            return Ok(installationDTO);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<InstalationDTO>>> GetAllByOfficeIdAsync([FromQuery] Guid? officeId)
         {
-            IEnumerable<Installation> installations = officeId.HasValue ?
+            try
+            {
+                IEnumerable<Installation> installations = officeId.HasValue ?
                 await installationRepository.GetByOfficeIdAsync(officeId.Value) :
                 await installationRepository.GetAllAsync();
 
-            var installationDtos = installations.Select(inst => new InstalationDTO()
-            {
-                Id = inst.Id,
-                Name = inst.Name,
-                OfficeId = inst.OfficeId,
-                PrintingDeviceId = inst.PrintingDeviceId,
-                InstallationOrderNumber = inst.InstallationOrderNumber,
-                IsDefault = inst.IsDefault
-            });
+                var installationDtos = installations.Select(inst => new InstalationDTO()
+                {
+                    Id = inst.Id,
+                    Name = inst.Name,
+                    OfficeId = inst.OfficeId,
+                    PrintingDeviceId = inst.PrintingDeviceId,
+                    InstallationOrderNumber = inst.InstallationOrderNumber,
+                    IsDefault = inst.IsDefault
+                });
 
-            return Ok(installationDtos);
+                return Ok(installationDtos);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while deleting the installation.", details = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]

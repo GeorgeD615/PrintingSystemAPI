@@ -88,7 +88,13 @@ namespace PrintingSystem.Db.Implementations
         public async Task<IEnumerable<Installation>> GetByOfficeIdAsync(Guid id)
         {
             var installations = await GetInstallationsFromCache();
-            return installations!.Where(inst => inst.OfficeId == id);
+
+            var office = await dbcontext.Offices.FindAsync(id);
+
+            if (office == null)
+                throw new KeyNotFoundException("Office not found.");
+
+            return installations!.Where(inst => inst.OfficeId == office.Id);
         }
 
         public async Task<IEnumerable<Installation>> GetAllAsync()
