@@ -15,7 +15,7 @@ namespace PrintingSystem.Db.Implementations
 
         public async Task<IEnumerable<Employee>> GetAllAsync()
         {
-            return await dbcontext.Employees.ToListAsync();
+            return await dbcontext.Employees.AsNoTracking().ToListAsync();
         }
     }
 }

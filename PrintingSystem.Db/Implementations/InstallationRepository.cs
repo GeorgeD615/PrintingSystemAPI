@@ -33,6 +33,7 @@ namespace PrintingSystem.Db.Implementations
                 throw new ArgumentException("Printing device does not exist.");
 
             var installationsInOffice = dbcontext.Installations
+                .AsNoTracking()
                 .Where(inst => inst.OfficeId == installation.OfficeId);
 
             if (installation.InstallationOrderNumber != null)
@@ -78,45 +79,29 @@ namespace PrintingSystem.Db.Implementations
             return installation.Id;
         }
 
-        public async Task<Installation?> GetById(Guid id)
+        public async Task<Installation?> GetByIdAsync(Guid id)
         {
-            if (!memoryCache.TryGetValue(CacheKey, out IEnumerable<Installation> installations))
-            {
-                installations = await dbcontext.Installations.ToListAsync();
-
-                var cacheOptions = new MemoryCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = cacheDuration
-                };
-
-                memoryCache.Set(CacheKey, installations, cacheOptions);
-            }
-
+            var installations = await GetInstallationsFromCache();
             return installations!.FirstOrDefault(inst => inst.Id == id);
         }
 
-        public async Task<IEnumerable<Installation>> GetByOfficeId(Guid id)
+        public async Task<IEnumerable<Installation>> GetByOfficeIdAsync(Guid id)
         {
-            if (!memoryCache.TryGetValue(CacheKey, out IEnumerable<Installation> installations))
-            {
-                installations = await dbcontext.Installations.ToListAsync();
-
-                var cacheOptions = new MemoryCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = cacheDuration
-                };
-
-                memoryCache.Set(CacheKey, installations, cacheOptions);
-            }
-
+            var installations = await GetInstallationsFromCache();
             return installations!.Where(inst => inst.OfficeId == id);
         }
 
-        public async Task<IEnumerable<Installation>> GetAll()
+        public async Task<IEnumerable<Installation>> GetAllAsync()
+        {
+            var installations = await GetInstallationsFromCache();
+            return installations;
+        }
+
+        private async Task<IEnumerable<Installation>> GetInstallationsFromCache()
         {
             if (!memoryCache.TryGetValue(CacheKey, out IEnumerable<Installation> installations))
             {
-                installations = await dbcontext.Installations.ToListAsync();
+                installations = await dbcontext.Installations.AsNoTracking().ToListAsync();
 
                 var cacheOptions = new MemoryCacheEntryOptions
                 {
@@ -129,7 +114,7 @@ namespace PrintingSystem.Db.Implementations
             return installations;
         }
 
-        public async Task Delete(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
             var installation = await dbcontext.Installations.FindAsync(id);
 

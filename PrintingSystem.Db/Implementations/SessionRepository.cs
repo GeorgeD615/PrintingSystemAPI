@@ -17,7 +17,7 @@ namespace PrintingSystem.Db.Implementations
             random = new Random();
         }
 
-        public async Task<bool> Create(Session session, int? installationOrderNumber, bool simulateDelay = true)
+        public async Task<bool> CreateAsync(Session session, int? installationOrderNumber, bool simulateDelay = true)
         {
             if (string.IsNullOrWhiteSpace(session.TaskName))
                 throw new ArgumentException("Print task name is required.");
@@ -28,6 +28,7 @@ namespace PrintingSystem.Db.Implementations
             var employee = await dbcontext.Employees
                 .Include(e => e.Office)
                 .ThenInclude(o => o.Installations)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == session.EmployeeId);
 
             if (employee == null)
@@ -42,6 +43,7 @@ namespace PrintingSystem.Db.Implementations
             if (installationOrderNumber != null)
             {
                 installation = await dbcontext.Installations
+                    .AsNoTracking()
                     .Where(inst => inst.OfficeId == office.Id)
                     .FirstOrDefaultAsync(inst => inst.InstallationOrderNumber == installationOrderNumber);
 
@@ -112,7 +114,7 @@ namespace PrintingSystem.Db.Implementations
                         };
                         int? installationOrderNumber = int.Parse(fields[2]);
 
-                        await Create(newSession, installationOrderNumber, false);
+                        await CreateAsync(newSession, installationOrderNumber, false);
                         ++result;
                     }
                     catch (Exception)

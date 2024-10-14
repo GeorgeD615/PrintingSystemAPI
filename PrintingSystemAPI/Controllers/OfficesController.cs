@@ -5,12 +5,12 @@ using PrintingSystemAPI.Models;
 namespace PrintingSystemAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class OfficeController : Controller
+    [Route("api/[controller]")]
+    public class OfficesController : ControllerBase
     {
         private readonly IOfficeRepository officeRepository;
 
-        public OfficeController(IOfficeRepository officeRepository)
+        public OfficesController(IOfficeRepository officeRepository)
         {
             this.officeRepository = officeRepository;
         }

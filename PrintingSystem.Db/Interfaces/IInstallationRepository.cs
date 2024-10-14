@@ -5,9 +5,9 @@ namespace PrintingSystem.Db.Interfaces
     public interface IInstallationRepository
     {
         Task<Guid> CreateAsync(Installation installation);
-        Task<Installation?> GetById(Guid id);
-        Task<IEnumerable<Installation>> GetAll();
-        Task<IEnumerable<Installation>> GetByOfficeId(Guid id);
-        Task Delete(Guid id);
+        Task<Installation?> GetByIdAsync(Guid id);
+        Task<IEnumerable<Installation>> GetAllAsync();
+        Task<IEnumerable<Installation>> GetByOfficeIdAsync(Guid id);
+        Task DeleteAsync(Guid id);
     }
 }

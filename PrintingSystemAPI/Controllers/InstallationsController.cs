@@ -6,18 +6,18 @@ using PrintingSystemAPI.Models;
 namespace PrintingSystemAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class InstallationController : Controller
+    [Route("api/[controller]")]
+    public class InstallationsController : ControllerBase
     {
         private readonly IInstallationRepository installationRepository;
 
-        public InstallationController(IInstallationRepository installationRepository)
+        public InstallationsController(IInstallationRepository installationRepository)
         {
             this.installationRepository = installationRepository;
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateInstallation([FromBody] InstallationCreateDTO installationDto)
+        public async Task<IActionResult> CreateAsync([FromBody] InstallationCreateDTO installationDto)
         {
             if (installationDto == null)
                 return BadRequest(new { message = "Installation data is required." });
@@ -38,7 +38,7 @@ namespace PrintingSystemAPI.Controllers
 
                 var createdInstallationId = await installationRepository.CreateAsync(installation);
 
-                return CreatedAtAction(nameof(GetInstallationById), new { id = createdInstallationId }, new { id = createdInstallationId });
+                return Ok( new { id = createdInstallationId } );
             }
             catch (ArgumentException ex)
             {
@@ -55,9 +55,9 @@ namespace PrintingSystemAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetInstallationById(Guid id)
+        public async Task<IActionResult> GetByIdAsync(Guid id)
         {
-            var installation = await installationRepository.GetById(id);
+            var installation = await installationRepository.GetByIdAsync(id);
 
             if (installation == null)
                 return NotFound();
@@ -66,11 +66,11 @@ namespace PrintingSystemAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<InstalationDTO>>> GetInstallationsByOfficeId([FromQuery] Guid officeId)
+        public async Task<ActionResult<IEnumerable<InstalationDTO>>> GetAllByOfficeIdAsync([FromQuery] Guid? officeId)
         {
-            IEnumerable<Installation> installations = officeId == Guid.Empty ?
-                await installationRepository.GetAll() :
-                await installationRepository.GetByOfficeId(officeId);
+            IEnumerable<Installation> installations = officeId.HasValue ?
+                await installationRepository.GetByOfficeIdAsync(officeId.Value) :
+                await installationRepository.GetAllAsync();
 
             var installationDtos = installations.Select(inst => new InstalationDTO()
             {
@@ -85,12 +85,12 @@ namespace PrintingSystemAPI.Controllers
             return Ok(installationDtos);
         }
 
-        [HttpDelete]
-        public async Task<ActionResult> Delete([FromQuery] Guid id)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteAsync(Guid id)
         {
             try
             {
-                await installationRepository.Delete(id);
+                await installationRepository.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -106,6 +106,5 @@ namespace PrintingSystemAPI.Controllers
                 return StatusCode(500, new { message = "An error occurred while deleting the installation.", details = ex.Message });
             }
         }
-
     }
 }

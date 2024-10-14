@@ -15,7 +15,7 @@ namespace PrintingSystem.Db.Implementations
 
         public async Task<IEnumerable<Office>> GetAllAsync()
         {
-            return await dbcontext.Offices.ToListAsync();
+            return await dbcontext.Offices.AsNoTracking().ToListAsync();
         }
     }
 }

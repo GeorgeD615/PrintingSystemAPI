@@ -7,12 +7,12 @@ using PrintingSystemAPI.Models;
 namespace PrintingSystemAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class PrintingDeviceController : Controller
+    [Route("api/[controller]")]
+    public class PrintingDevicesController : ControllerBase
     {
         private readonly IPrintingDeviceRepository printingDeviceRepository;
 
-        public PrintingDeviceController(IPrintingDeviceRepository printingDeviceRepository)
+        public PrintingDevicesController(IPrintingDeviceRepository printingDeviceRepository)
         {
             this.printingDeviceRepository = printingDeviceRepository;
         }

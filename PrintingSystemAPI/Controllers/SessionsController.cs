@@ -6,18 +6,18 @@ using PrintingSystemAPI.Models;
 namespace PrintingSystemAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class SessionController : Controller
+    [Route("api/[controller]")]
+    public class SessionsController : ControllerBase
     {
         private readonly ISessionRepository sessionRepository;
 
-        public SessionController(ISessionRepository sessionRepository)
+        public SessionsController(ISessionRepository sessionRepository)
         {
             this.sessionRepository = sessionRepository;
         } 
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] SessionCreateDTO sessionDto)
+        public async Task<IActionResult> CreateAsync([FromBody] SessionCreateDTO sessionDto)
         {
             try
             {
@@ -27,7 +27,7 @@ namespace PrintingSystemAPI.Controllers
                     EmployeeId = sessionDto.EmployeeId,
                     NumberOfPages = sessionDto.NumberOfPages
                 };
-                var sessionStatus = await sessionRepository.Create(session, sessionDto.DeviceOrderNumber) ? "Успех" : "Неудача";
+                var sessionStatus = await sessionRepository.CreateAsync(session, sessionDto.DeviceOrderNumber) ? "Успех" : "Неудача";
                 return Ok(new { sessionStatus });
             }
             catch (ArgumentException ex)
@@ -40,8 +40,8 @@ namespace PrintingSystemAPI.Controllers
             }
         }
 
-        [HttpPost("UploadCsv")]
-        public async Task<IActionResult> UploadPrintJobsFromCsv(IFormFile file)
+        [HttpPost("upload-csv")]
+        public async Task<IActionResult> UploadPrintJobsFromCsvAsync(IFormFile file)
         {
             try
             {

@@ -15,13 +15,17 @@ namespace PrintingSystem.Db.Implementations
 
         public async Task<IEnumerable<PrintingDevice>> GetAllAsync()
         {
-            return await dbcontext.PrintingDevices.Include(pd => pd.ConnectionType).ToListAsync();
+            return await dbcontext.PrintingDevices
+                .Include(pd => pd.ConnectionType)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<PrintingDevice>> GetByConnectionTypeAsync(string connectionType)
         {
             return await dbcontext.PrintingDevices
                 .Include(pd => pd.ConnectionType)
+                .AsNoTracking()
                 .Where(pd => pd.ConnectionType!.Name.ToLower() == connectionType)
                 .ToListAsync();
         }
