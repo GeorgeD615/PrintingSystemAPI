@@ -39,5 +39,27 @@ namespace PrintingSystemAPI.Controllers
                 return StatusCode(500, new { message = "An error occurred while processing the request.", error = ex.Message });
             }
         }
+
+        [HttpPost("UploadCsv")]
+        public async Task<IActionResult> UploadPrintJobsFromCsv(IFormFile file)
+        {
+            try
+            {
+                var result = await sessionRepository.ProcessSessionsFromCsvAsync(file);
+                return Ok(new { result });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return UnprocessableEntity(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing the file.", error = ex.Message });
+            }
+        }
     }
 }

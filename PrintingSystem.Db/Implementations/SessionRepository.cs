@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using PrintingSystem.Db.Interfaces;
 using PrintingSystem.Db.Models;
+using System.Text;
 
 namespace PrintingSystem.Db.Implementations
 {
@@ -15,7 +17,7 @@ namespace PrintingSystem.Db.Implementations
             random = new Random();
         }
 
-        public async Task<bool> Create(Session session, int? installationOrderNumber)
+        public async Task<bool> Create(Session session, int? installationOrderNumber, bool simulateDelay = true)
         {
             if (string.IsNullOrWhiteSpace(session.TaskName))
                 throw new ArgumentException("Print task name is required.");
@@ -58,8 +60,11 @@ namespace PrintingSystem.Db.Implementations
 
             session.InstallationId = installation.Id;
 
-            var delay = random.Next(1000, 4000);
-            await Task.Delay(delay);
+            if (simulateDelay)
+            {
+                var delay = random.Next(1000, 4000);
+                await Task.Delay(delay);
+            }
 
             bool isSuccess = random.Next(0, 2) == 1;
 
@@ -71,6 +76,54 @@ namespace PrintingSystem.Db.Implementations
             await dbcontext.SaveChangesAsync();
 
             return isSuccess;
+        }
+
+        public async Task<int> ProcessSessionsFromCsvAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("File is empty or missing.");
+
+            var result = 0;
+
+            using (var streamReader = new StreamReader(file.OpenReadStream(), Encoding.UTF8))
+            {
+                string line;
+                int lineNumber = 0;
+
+                while ((line = await streamReader.ReadLineAsync()) != null)
+                {
+                    lineNumber++;
+
+                    if (lineNumber > 100)
+                        break;
+
+                    var fields = line.Split(';');
+
+                    if (fields.Length < 4 || fields.Any(string.IsNullOrWhiteSpace))
+                        continue;
+
+                    try
+                    {
+                        var newSession = new Session
+                        {
+                            TaskName = fields[0],
+                            EmployeeId = Guid.Parse(fields[1]),
+                            NumberOfPages = int.Parse(fields[3])
+                        };
+                        int? installationOrderNumber = int.Parse(fields[2]);
+
+                        await Create(newSession, installationOrderNumber, false);
+                        ++result;
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+                }
+
+            }
+
+            return result;
         }
     }
 }
