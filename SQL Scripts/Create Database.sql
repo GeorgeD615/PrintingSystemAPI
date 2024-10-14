@@ -70,7 +70,7 @@ CREATE TABLE Session (
     number_of_pages INT NOT NULL,
     status_id UNIQUEIDENTIFIER NOT NULL,
     FOREIGN KEY (employee_id) REFERENCES Employee(id),
-    FOREIGN KEY (installation_id) REFERENCES Installation(id),
+    FOREIGN KEY (installation_id) REFERENCES Installation(id) ON DELETE CASCADE,
     FOREIGN KEY (status_id) REFERENCES SeccionStatus(id)
 );
 

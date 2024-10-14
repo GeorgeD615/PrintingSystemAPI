@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PrintingSystem.Db.Models;
 
 namespace PrintingSystem.Db;
@@ -192,7 +190,7 @@ public partial class PrintingSystemContext : DbContext
 
             entity.HasOne(d => d.Installation).WithMany(p => p.Sessions)
                 .HasForeignKey(d => d.InstallationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__Session__install__3E52440B");
 
             entity.HasOne(d => d.Status).WithMany(p => p.Sessions)

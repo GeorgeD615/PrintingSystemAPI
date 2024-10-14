@@ -122,8 +122,10 @@ namespace PrintingSystem.Db.Implementations
                         continue;
                     }
                 }
-
             }
+
+            if (result == 0)
+                throw new InvalidOperationException("Incorrect file format. Cannot retrieve data from the file.");
 
             return result;
         }

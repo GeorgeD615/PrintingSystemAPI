@@ -15,11 +15,20 @@ namespace PrintingSystemAPI.Controllers
             this.officeRepository = officeRepository;
         }
 
+        /// <summary>
+        /// Получает список всех офисов.
+        /// </summary>
+        /// <returns>Список офисов.</returns>
+        /// <response code="200">Возвращает список офисов.</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<OfficeDTO>>> GetAllAsync()
         {
             var offices = await officeRepository.GetAllAsync();
-            return Ok(offices.Select(o => new OfficeDTO() { Id = o.Id, Name = o.Name }));
+            return Ok(offices.Select(o => new OfficeDTO() { 
+                Id = o.Id, 
+                Name = o.Name 
+            }));
         }
     }
 }

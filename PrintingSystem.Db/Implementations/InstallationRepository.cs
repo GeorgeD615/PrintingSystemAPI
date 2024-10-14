@@ -12,7 +12,6 @@ namespace PrintingSystem.Db.Implementations
         private readonly TimeSpan cacheDuration = TimeSpan.FromMinutes(105);
         private const string CacheKey = "installations_cache";
         private int MaxInstallationOrderNumber { get; } = 255;
-        private int MinInstallationOrderNumber { get; } = 1;
 
         public InstallationRepository(PrintingSystemContext dbcontext, IMemoryCache memoryCache)
         {
@@ -38,15 +37,11 @@ namespace PrintingSystem.Db.Implementations
 
             if (installation.InstallationOrderNumber != null)
             {
-                if (installation.InstallationOrderNumber < MinInstallationOrderNumber ||
-                    installation.InstallationOrderNumber > MaxInstallationOrderNumber)
-                    throw new ArgumentException($"The device order number must be in the range of {MinInstallationOrderNumber} to {MaxInstallationOrderNumber}");
-
                 bool orderNumberExists = await installationsInOffice
                     .AnyAsync(inst => inst.InstallationOrderNumber == installation.InstallationOrderNumber);
 
                 if (orderNumberExists)
-                    throw new ArgumentException("Installation with the specified order number already exists.");
+                    throw new InvalidOperationException("Installation with the specified order number already exists.");
             }
             else
             {

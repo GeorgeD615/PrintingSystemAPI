@@ -17,7 +17,16 @@ namespace PrintingSystemAPI.Controllers
             this.printingDeviceRepository = printingDeviceRepository;
         }
 
+        /// <summary>
+        /// Получает список всех устройств печати.
+        /// </summary>
+        /// <param name="connectionType">Необязательный параметр для фильтрации устройств по типу подключения.</param>
+        /// <returns>Список устройств печати.</returns>
+        /// <response code="200">Возвращает список устройств печати.</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<PrintingDeviceDTO>>> GetAllAsync([FromQuery] string? connectionType = null)
         {
             IEnumerable<PrintingDevice> printingDevices;

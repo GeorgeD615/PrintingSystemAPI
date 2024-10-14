@@ -1,6 +1,4 @@
-﻿using PrintingSystem.Db.Models;
-
-namespace PrintingSystemAPI.Models
+﻿namespace PrintingSystemAPI.Models
 {
     public class PrintingDeviceDTO
     {

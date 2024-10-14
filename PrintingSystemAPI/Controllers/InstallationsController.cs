@@ -16,14 +16,24 @@ namespace PrintingSystemAPI.Controllers
             this.installationRepository = installationRepository;
         }
 
+        /// <summary>
+        /// Создает новую инсталляцию устройства печати.
+        /// </summary>
+        /// <param name="installationDto">Данные для создания инсталляции.</param>
+        /// <returns>Созданная инсталляция.</returns>
+        /// <response code="200">Возвращает идентификатор созданной инсталляции.</response>
+        /// <response code="400">Некорректные данные в запросе.</response>
+        /// <response code="409">Конфликт с существующими данными.</response>
+        /// <response code="500">Ошибка на сервере.</response>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateAsync([FromBody] InstallationCreateDTO installationDto)
         {
-            if (installationDto == null)
-                return BadRequest(new { message = "Installation data is required." });
-
-            if (string.IsNullOrEmpty(installationDto.Name) || installationDto.OfficeId == Guid.Empty || installationDto.PrintingDeviceId == Guid.Empty)
-                return BadRequest(new { message = "Invalid data: Name, OfficeId and PrintingDeviceId are required." });
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             try
             {
@@ -32,13 +42,13 @@ namespace PrintingSystemAPI.Controllers
                     Name = installationDto.Name,
                     OfficeId = installationDto.OfficeId,
                     PrintingDeviceId = installationDto.PrintingDeviceId,
-                    InstallationOrderNumber = installationDto.InstallationOrderNumber,
+                    InstallationOrderNumber = installationDto.DeviceOrderNumber,
                     IsDefault = installationDto.IsDefault
                 };
 
                 var createdInstallationId = await installationRepository.CreateAsync(installation);
 
-                return Ok( new { id = createdInstallationId } );
+                return Ok( new { CreatedInstallationId = createdInstallationId } );
             }
             catch (ArgumentException ex)
             {
@@ -54,7 +64,16 @@ namespace PrintingSystemAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Получает инсталляцию по идентификатору.
+        /// </summary>
+        /// <param name="id">Идентификатор инсталляции.</param>
+        /// <returns>Информация о инсталляции.</returns>
+        /// <response code="200">Возвращает информацию об инсталляции.</response>
+        /// <response code="404">Инсталляция не найдена.</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetByIdAsync(Guid id)
         {
             var installation = await installationRepository.GetByIdAsync(id);
@@ -75,7 +94,18 @@ namespace PrintingSystemAPI.Controllers
             return Ok(installationDTO);
         }
 
+        /// <summary>
+        /// Получает все инсталляции или инсталляции по идентификатору филиала.
+        /// </summary>
+        /// <param name="officeId">Идентификатор филиала (необязательный).</param>
+        /// <returns>Список инсталляций.</returns>
+        /// <response code="200">Возвращает список инсталляций.</response>
+        /// <response code="404">Инсталляции не найдены.</response>
+        /// <response code="500">Ошибка на сервере.</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<InstalationDTO>>> GetAllByOfficeIdAsync([FromQuery] Guid? officeId)
         {
             try
@@ -106,7 +136,20 @@ namespace PrintingSystemAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Удаляет инсталляцию по идентификатору.
+        /// </summary>
+        /// <param name="id">Идентификатор инсталляции.</param>
+        /// <returns>Результат удаления.</returns>
+        /// <response code="204">Инсталляция успешно удалена.</response>
+        /// <response code="404">Инсталляция не найдена.</response>
+        /// <response code="409">Конфликт с существующими данными.</response>
+        /// <response code="500">Ошибка на сервере.</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> DeleteAsync(Guid id)
         {
             try

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace PrintingSystem.Db.Models;
+﻿namespace PrintingSystem.Db.Models;
 
 public partial class Employee
 {
